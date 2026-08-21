@@ -1,0 +1,64 @@
+#ifndef COLOR_H
+#define COLOR_H
+
+#include <cmath>
+#include <cstdint>
+#include <string>
+
+typedef struct {
+    float hue;
+    float saturation;
+    float value;
+} ColorHSV;
+
+class Color {
+
+  public:
+    float red;
+    float green;
+    float blue;
+
+    Color(float red, float green, float blue);
+    Color();
+
+    Color to_sRGB() const;
+    Color to_gamma() const;
+    uint8_t to_8bit() const;
+    uint16_t to_16bit() const;
+    uint32_t to_18bit() const;
+
+    static Color splat(float value);
+
+    ColorHSV from_RGB() const;
+    static Color to_RGB(ColorHSV hsv);
+
+    const char *to_string() const;
+
+    Color operator+(const Color &c) const;
+    Color operator-(const Color &c) const;
+    Color operator*(const Color &c) const;
+    Color operator/(const Color &c) const;
+
+    Color operator+(const float v) const;
+    Color operator-(const float v) const;
+    Color operator*(const float v) const;
+    Color operator/(const float v) const;
+
+    Color &operator+=(const Color &c);
+    Color &operator-=(const Color &c);
+    Color &operator*=(const Color &c);
+    Color &operator/=(const Color &c);
+
+    Color &operator+=(float c);
+    Color &operator-=(float c);
+    Color &operator*=(float c);
+    Color &operator/=(float c);
+
+    Color pow(float exponent);
+    void inplace_pow(float exponent);
+
+  private:
+    float _convert_sRGB(float value) const;
+};
+
+#endif // COLOR_H

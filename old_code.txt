@@ -1,0 +1,113 @@
+    driver.start();
+    driver.clear_buffer();
+    driver.set_pixel(0, 0, COLOR_WHITE);
+    driver.set_pixel(SSD1351_WIDTH, 0, COLOR_WHITE);
+    driver.set_pixel(0, SSD1351_HEIGHT, COLOR_WHITE);
+    driver.set_pixel(SSD1351_WIDTH, SSD1351_HEIGHT, COLOR_WHITE);
+
+    driver.render_buffer();
+
+    Color c = {255, 255, 0};
+    uint16_t bit_c = color_to_uint16(c);
+    Serial.print("16:");
+    Serial.println(bit_c);
+    Serial.print("16 hex:");
+    Serial.println(bit_c, HEX);
+    Serial.println(print_color(c).c_str());
+
+    screen.fill(c);
+    driver.render_buffer(screen.get_buffer());
+
+        screen.fill(COLOR_RED);
+    driver.render_buffer(screen.get_buffer());
+    screen.fill(COLOR_GREEN);
+    driver.render_buffer(screen.get_buffer());
+    screen.fill(COLOR_BLUE);
+    driver.render_buffer(screen.get_buffer());
+
+    // driver.fill_buffer(COLOR_RED);
+    // driver.render_buffer();
+    // driver.fill_buffer(COLOR_GREEN);
+    // driver.render_buffer();
+    // driver.fill_buffer(COLOR_BLUE);
+    // driver.render_buffer();
+
+    // driver.fill_with_buffer(COLOR_RED);
+    // driver.fill_with_buffer(COLOR_GREEN);
+
+
+
+        delay(1000);
+    canvas.fill(COLOR_RED);
+    driver.render();
+
+    delay(1000);
+    canvas.fill(COLOR_GREEN);
+    driver.render();
+
+    delay(1000);
+    canvas.fill(COLOR_BLUE);
+    driver.render();
+
+    uint8_t width = SSD1351_WIDTH;
+    uint8_t height = SSD1351_HEIGHT;
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+            float norm_y = (float)y / height;
+            float norm_x = (float)x / width;
+
+            Color c = {norm_x, norm_y, 1.0f};
+            driver.set_pixel(x, y, c.to_16bit());
+        }
+    }
+
+    driver.render();
+
+
+
+        for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+            float norm_y = (float)y / height;
+            float norm_x = (float)x / width;
+
+            Color c = {norm_x, norm_x, norm_x};
+
+            if (y == 0) {
+                Serial.println(c.to_sRGB().to_string());
+            }
+
+            canvas.set_pixel(x, y, c.to_uint16());
+            if (y > height / 3) {
+                canvas.set_pixel(x, y, c.to_gamma().to_uint16());
+            }
+            if (y > height / 3 + height / 3) {
+                canvas.set_pixel(x, y, c.to_sRGB().to_uint16());
+            }
+        }
+    }
+
+        for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+            if (y > (height / 3) * 0) {
+                ColorHSV c = {90, 1, 1};
+                driver.set_pixel(x, y, Color::to_RGB(c).to_16bit());
+            }
+
+            if (y > (height / 3) * 1) {
+                ColorHSV c = {180, 1, 1};
+                driver.set_pixel(x, y, Color::to_RGB(c).to_16bit());
+            }
+
+            if (y > (height / 3) * 2) {
+                ColorHSV c = {270, 1, 1};
+                driver.set_pixel(x, y, Color::to_RGB(c).to_16bit());
+            }
+        }
+    }
+
+
+
+        ColorHSV hsv = {(sin(millis() * 0.001f) + 1.0f) * 0.5f * 360.0f, 1.0f, 1.0f};
+    Color rgb = Color::to_RGB(hsv);
+    Serial.println(hsv.hue);
+    driver.fill_buffer(rgb.to_16bit());

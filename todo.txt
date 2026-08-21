@@ -1,0 +1,5 @@
+
+to different variables, one for pixels and one for width
+#define SSD1351_WIDTH 127  // 128 pixels in total
+#define SSD1351_HEIGHT 127 // 128 pixels in total
+
