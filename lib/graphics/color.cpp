@@ -99,10 +99,6 @@ ColorHSV Color::from_RGB() const {
     return ColorHSV();
 }
 
-Color Color::splat(float value) {
-    return Color(value, value, value);
-}
-
 Color Color::operator+(const Color &c) const {
     return Color(red + c.red, green + c.green, blue + c.blue);
 }

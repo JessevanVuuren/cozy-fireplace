@@ -27,11 +27,8 @@ class Color {
     uint16_t to_16bit() const;
     uint32_t to_18bit() const;
 
-    static Color splat(float value);
-
     ColorHSV from_RGB() const;
     static Color to_RGB(ColorHSV hsv);
-
     const char *to_string() const;
 
     Color operator+(const Color &c) const;

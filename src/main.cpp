@@ -4,7 +4,9 @@
 #include <graphics.h>
 
 // HARDWARE: ESP32 240MHz, 320KB RAM, 4MB Flash
-// buffer = 32768 bytes = 32KB
+// buffer = 128 * 128 = 16384(utf8) bytes
+// 16384 * 2 for 16bit color = 32768 bytes = 32KB
+// fasted time = FPS: 67.76
 
 #define OLED_DC GPIO_NUM_2
 #define OLED_CS GPIO_NUM_0
@@ -12,21 +14,24 @@
 #define CLOCK_SPEED 20000000 // 20 MHz
 
 SSD1351 driver(OLED_CS, OLED_DC, OLED_RST, CLOCK_SPEED, ColorLevel::BIT_16);
-Graphics canvas(SSD1351_WIDTH, SSD1351_HEIGHT);
+
+setPixelFunc pixel = [](int x, int y, uint32_t color) {
+    driver.set_pixel(x, y, color);
+};
+
+Graphics canvas(SSD1351_WIDTH, SSD1351_HEIGHT, pixel);
 
 uint8_t width = SSD1351_WIDTH;
 uint8_t height = SSD1351_HEIGHT;
 
 void setup() {
     Serial.begin(115200);
-    driver.start(canvas.get_buffer(), canvas.buffer_size());
+    driver.start();
 }
 
 void loop() {
-    ColorHSV hsv = {(sin(millis() * 0.001f) + 1.0f) * 0.5f * 360.0f, 1.0f, 1.0f};
-    Color rgb = Color::to_RGB(hsv);
-    Serial.println(hsv.hue);
-    driver.fill_buffer(rgb.to_16bit());
+
+
 
     driver.render();
 }
