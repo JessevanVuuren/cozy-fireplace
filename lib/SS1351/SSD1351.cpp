@@ -141,6 +141,16 @@ void SSD1351::set_pixel(int x, int y, uint32_t color) {
     }
 }
 
+uint32_t SSD1351::get_pixel(int x, int y) const {
+    int index = y * SSD1351_HEIGHT + x;
+    int offset = index * 2;
+
+    int color_1 = _buffer[offset + 0];
+    int color_2 = _buffer[offset + 1];
+
+    return (color_1 << 8) | color_2;
+}
+
 void SSD1351::write_regi(int reg) {
     digitalWrite(_dc, LOW);
     digitalWrite(_cs, LOW);

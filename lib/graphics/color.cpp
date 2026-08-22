@@ -62,7 +62,25 @@ Color Color::to_RGB(ColorHSV hsv) {
     float c = hsv.value * hsv.saturation;
     float h = hsv.hue / 60.0f;
     float x = c * (1.0f - fabsf(fmodf(h, 2.0f) - 1.0f));
+    float m = hsv.value - c;
 
+    Color color = _hsl_hsv_to_rgb(h, c, x);
+
+    return color + m;
+}
+
+Color Color::to_RGB(ColorHSL hsl) {
+    float c = (1.0f - fabsf(2.0f * hsl.lightness - 1.0f)) * hsl.saturation;
+    float h = hsl.hue / 60.0f;
+    float x = c * (1.0f - fabsf(fmodf(h, 2.0f) - 1.0f));
+    float m = hsl.lightness - c / 2.0f;
+
+    Color color = _hsl_hsv_to_rgb(h, c, x);
+
+    return color + m;
+}
+
+Color Color::_hsl_hsv_to_rgb(float h, float c, float x) {
     Color color;
 
     if (h >= 0.0f && h < 1.0f) {
@@ -90,9 +108,7 @@ Color Color::to_RGB(ColorHSV hsv) {
         color.blue = x;
     }
 
-    float m = hsv.value - c;
-
-    return color + m;
+    return color;
 }
 
 ColorHSV Color::from_RGB() const {

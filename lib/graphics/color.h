@@ -11,6 +11,13 @@ typedef struct {
     float value;
 } ColorHSV;
 
+typedef struct {
+    float hue;
+    float saturation;
+    float lightness;
+} ColorHSL;
+
+
 class Color {
 
   public:
@@ -29,6 +36,7 @@ class Color {
 
     ColorHSV from_RGB() const;
     static Color to_RGB(ColorHSV hsv);
+    static Color to_RGB(ColorHSL hsl);
     const char *to_string() const;
 
     Color operator+(const Color &c) const;
@@ -56,6 +64,7 @@ class Color {
 
   private:
     float _convert_sRGB(float value) const;
+    static Color _hsl_hsv_to_rgb(float h, float c, float x);
 };
 
 #endif // COLOR_H
