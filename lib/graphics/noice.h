@@ -54,12 +54,12 @@ float dot_product(Vec2 p, Vec2 p2) {
     return p.x * p2.x + p.y * p2.y;
 }
 
-float Noise2D(float x, float y, int *perm_table) {
-    int X = (int)floor(x) & 255;
-    int Y = (int)floor(y) & 255;
+float noise_2D(Vec2 vec, int *perm_table) {
+    int X = (int)floor(vec.x) & 255;
+    int Y = (int)floor(vec.y) & 255;
 
-    float xf = x - floor(x);
-    float yf = y - floor(y);
+    float xf = vec.x - floor(vec.x);
+    float yf = vec.y - floor(vec.y);
 
     Vec2 topRight = Vec2(xf - 1.0, yf - 1.0);
     Vec2 topLeft = Vec2(xf, yf - 1.0);
@@ -91,7 +91,7 @@ float grad_3D(int hash, float x, float y, float z) {
     return ((h & 1) == 0 ? u : -u) + ((h & 2) == 0 ? v : -v);
 }
 
-float Noise3D(float x, float y, float z, int *perm_table) {
+float noise_3D(float x, float y, float z, int *perm_table) {
     int X = (int)floor(x) & 255;
     int Y = (int)floor(y) & 255;
     int Z = (int)floor(z) & 255;

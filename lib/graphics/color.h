@@ -17,7 +17,6 @@ typedef struct {
     float lightness;
 } ColorHSL;
 
-
 class Color {
 
   public:
@@ -25,8 +24,9 @@ class Color {
     float green;
     float blue;
 
-    Color(float red, float green, float blue);
     Color();
+    Color(float value);
+    Color(float red, float green, float blue);
 
     Color to_sRGB() const;
     Color to_gamma() const;

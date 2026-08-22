@@ -1,8 +1,10 @@
 #include "color.h"
 
-Color::Color(float red, float green, float blue) : red(red), green(green), blue(blue) {}
-
 Color::Color() : red(0.0f), green(0.0f), blue(0.0f) {}
+
+Color::Color(float value) : red(value), green(value), blue(value) {}
+
+Color::Color(float red, float green, float blue) : red(red), green(green), blue(blue) {}
 
 uint8_t Color::to_8bit() const {
     uint8_t r = red * 7;
