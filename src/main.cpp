@@ -12,6 +12,7 @@
 #define OLED_DC GPIO_NUM_2
 #define OLED_CS GPIO_NUM_0
 #define OLED_RST GPIO_NUM_4
+#define FEED_BUTTON GPIO_NUM_13
 #define CLOCK_SPEED 20000000 // 20 MHz
 
 SSD1351 driver(OLED_CS, OLED_DC, OLED_RST, CLOCK_SPEED, ColorLevel::BIT_16);
@@ -21,26 +22,32 @@ const uint8_t height = SSD1351_HEIGHT;
 
 const int noise_height = height * 2;
 const float noise_scale = 4.3;
+const float noise_speed = 0.3;
 
-int *perm = make_permutation();
+int *perm;
 
-uint8_t noise_map[noise_height][width];
+uint16_t palette[256];
+uint16_t fire[height * width];
 
-uint32_t palette[256];
-uint32_t fire[height][width];
+typedef struct {
+    float scale;
+    float speed;
+    float step;
+    float strength;
+} Noise;
+
+Noise layers[] = {
+    {4.5, 0.3, 0, 0.45},
+    {15.4, 0.3, 0, 0.15},
+    {1.3, 0.3, 0, 0.4}};
 
 void setup() {
+    pinMode(FEED_BUTTON, INPUT_PULLDOWN);
+
     Serial.begin(115200);
     driver.start();
 
-    for (int y = 0; y < noise_height; y++) {
-        for (int x = 0; x < width; x++) {
-            Vec2 point = (Vec2(x, y) / Vec2(width, height)) * noise_scale;
-            uint8_t n = (noise_2D(point, perm) + 1.0f) * 127.5f;
-
-            noise_map[y][x] = n;
-        }
-    }
+    perm = make_permutation();
 
     for (int x = 0; x < 256; x++) {
         ColorHSL color = ColorHSL{x / 4.0f, 1.0f, fminf(200, x * 2) / 255.0f};
@@ -48,38 +55,52 @@ void setup() {
     }
 }
 
-float count = 0;
+int surrounding_fire_level(uint16_t *fire, int x, int y, int width, int height) {
+    int fire_1 = fire[((y + 1) % height) * width + ((x - 1 + width) % width)];
+    int fire_2 = fire[((y + 1) % height) * width + x];
+    int fire_3 = fire[((y + 1) % height) * width + ((x + 1) % width)];
+    int fire_4 = fire[((y + 2) % height) * width + x];
+
+    return fire_1 + fire_2 + fire_3 + fire_4;
+}
+
 void loop() {
 
     unsigned long time = micros();
 
     for (int x = 0; x < width; x++) {
-        uint8_t n = noise_map[(int)count % noise_height][x];
-        fire[height - 1][x] = n;
-        // driver.set_pixel(x, height - 1, n);
+        float n = 0.0f;
+        for (Noise layer : layers) {
+            Vec2 pos = Vec2(x, layer.step) / Vec2(width, height);
+            Vec2 height = pos * layer.scale;
+
+            uint8_t l = (noise_2D(height, perm) + 1.0f) * 127.5f;
+            n += l * layer.strength;
+        }
+
+        fire[(height - 1) * width + x] = n;
     }
 
     for (int y = 0; y < height - 1; y++) {
         for (int x = 0; x < width; x++) {
-            int fire_1 = fire[(y + 1) % height][(x - 1 + width) % width];
-            int fire_2 = fire[(y + 1) % height][(x) % width];
-            int fire_3 = fire[(y + 1) % height][(x + 1) % width];
-            int fire_4 = fire[(y + 2) % height][(x) % width];
-
-            fire[y][x] = (fire_1 + fire_2 + fire_3 + fire_4) / 4.055f;
+            int heat = surrounding_fire_level(fire, x, y, width, height);
+            fire[y * width + x] = heat / 4.055f;
         }
     }
 
     for (int y = 0; y < height; y++)
         for (int x = 0; x < width; x++)
-            driver.set_pixel(x, y, palette[fire[y][x]]);
+            driver.set_pixel(x, y, palette[fire[y * width + x]]);
+
+    for (Noise layer : layers) {
+        layer.step += layer.speed;
+    }
+
+    int feed_fire = digitalRead(FEED_BUTTON);
 
     driver.render();
-    count += 1.0f * 0.3f;
-
-    Serial.print("FPS: ");
+    Serial.print("FEED: ");
+    Serial.print(feed_fire);
+    Serial.print(", FPS: ");
     Serial.println(1000000.0 / (micros() - time));
 }
-
-// pio run --target upload
-// pio device monitor

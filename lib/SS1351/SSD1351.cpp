@@ -110,7 +110,7 @@ void SSD1351::render() {
 }
 
 void SSD1351::set_pixel(int x, int y, uint32_t color) {
-    int index = y * SSD1351_HEIGHT + x;
+    int index = (127-y) * SSD1351_HEIGHT + (127-x);
 
     switch (_color_bit) {
     case 0: {
