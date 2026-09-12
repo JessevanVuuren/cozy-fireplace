@@ -78,14 +78,25 @@ void loop() {
             n += l * layer.strength;
         }
 
-        float half = width / 2;
-        float norm = 1.0;
+        float half = width / 2.0f;
+        float norm = 0.0;
         if (x < half) {
-            norm = x / half;
+            // norm = x / half;
+            norm = lerp(0, half, x);
         } else {
-            norm = x-half / width;
-            norm = 1.0 - norm;
+            norm = 1.0 - lerp(half, width, x);
+            // norm = (x - half + 1) / half;
+            // norm = 1.0 - norm;
         }
+
+
+        // float norm = 1.0;
+        // if (x < half) {
+        //     norm = x / half;
+        // } else {
+        //     norm = (x - half + 1) / half;
+        //     norm = 1.0 - norm;
+        // }
 
         fire[(height - 1) * width + x] = n * norm;
     }
