@@ -37,9 +37,9 @@ typedef struct {
 } Noise;
 
 Noise layers[] = {
-    {4.5, 0.3, 0, 0.45},
-    {15.4, 0.3, 0, 0.15},
-    {1.3, 0.3, 0, 0.4}};
+    {4.5, 0.2, 0.0, 0.45},
+    {15.4, 0.3, 0.0, 0.15},
+    {1.3, 1.3, 0.0, 0.4}};
 
 void setup() {
     pinMode(FEED_BUTTON, INPUT_PULLDOWN);
@@ -70,7 +70,7 @@ void loop() {
 
     for (int x = 0; x < width; x++) {
         float n = 0.0f;
-        for (Noise layer : layers) {
+        for (const Noise &layer : layers) {
             Vec2 pos = Vec2(x, layer.step) / Vec2(width, height);
             Vec2 height = pos * layer.scale;
 
@@ -78,7 +78,16 @@ void loop() {
             n += l * layer.strength;
         }
 
-        fire[(height - 1) * width + x] = n;
+        float half = width / 2;
+        float norm = 1.0;
+        if (x < half) {
+            norm = x / half;
+        } else {
+            norm = x-half / width;
+            norm = 1.0 - norm;
+        }
+
+        fire[(height - 1) * width + x] = n * norm;
     }
 
     for (int y = 0; y < height - 1; y++) {
@@ -92,15 +101,14 @@ void loop() {
         for (int x = 0; x < width; x++)
             driver.set_pixel(x, y, palette[fire[y * width + x]]);
 
-    for (Noise layer : layers) {
+    for (Noise &layer : layers)
         layer.step += layer.speed;
-    }
 
     int feed_fire = digitalRead(FEED_BUTTON);
 
     driver.render();
-    Serial.print("FEED: ");
-    Serial.print(feed_fire);
-    Serial.print(", FPS: ");
-    Serial.println(1000000.0 / (micros() - time));
+    // Serial.print("FEED: ");
+    // Serial.print(feed_fire);
+    // Serial.print(", FPS: ");
+    // Serial.println(1000000.0 / (micros() - time));
 }
