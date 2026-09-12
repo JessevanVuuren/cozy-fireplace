@@ -15,16 +15,16 @@
 #define FEED_BUTTON GPIO_NUM_13
 #define CLOCK_SPEED 20000000 // 20 MHz
 
+#define SIDE_PADDING 2
+#define CONE_STRENGTH 0.5
+
 SSD1351 driver(OLED_CS, OLED_DC, OLED_RST, CLOCK_SPEED, ColorLevel::BIT_16);
 
-const uint8_t width = SSD1351_WIDTH;
-const uint8_t height = SSD1351_HEIGHT;
+static constexpr uint8_t width = SSD1351_WIDTH;
+static constexpr uint8_t height = SSD1351_HEIGHT;
 
-const int noise_height = height * 2;
-const float noise_scale = 4.3;
-const float noise_speed = 0.3;
-
-int *perm;
+int *permutation;
+float fire_cone[width - 1] = {0};
 
 uint16_t palette[256];
 uint16_t fire[height * width];
@@ -41,13 +41,22 @@ Noise layers[] = {
     {15.4, 0.3, 0.0, 0.15},
     {1.3, 1.3, 0.0, 0.4}};
 
+float parabolic(float step, float max, float power) {
+    float x = step / max;
+    return powf(4.0f * x * (1 - x), power);
+}
+
 void setup() {
     pinMode(FEED_BUTTON, INPUT_PULLDOWN);
 
     Serial.begin(115200);
     driver.start();
 
-    perm = make_permutation();
+    permutation = make_permutation();
+
+    for (int x = 0; x < width - SIDE_PADDING * 2; x++) {
+        fire_cone[x] = parabolic(x, width - 1, CONE_STRENGTH);
+    }
 
     for (int x = 0; x < 256; x++) {
         ColorHSL color = ColorHSL{x / 4.0f, 1.0f, fminf(200, x * 2) / 255.0f};
@@ -65,40 +74,22 @@ int surrounding_fire_level(uint16_t *fire, int x, int y, int width, int height) 
 }
 
 void loop() {
-
     unsigned long time = micros();
+    float t = (sinf(time * 0.0000001f) + 1.0f) * 0.5f;
+    Serial.println(t);
 
-    for (int x = 0; x < width; x++) {
-        float n = 0.0f;
+    for (int x = SIDE_PADDING; x < width - SIDE_PADDING; x++) {
+        float heat = 0.0f;
         for (const Noise &layer : layers) {
-            Vec2 pos = Vec2(x, layer.step) / Vec2(width, height);
-            Vec2 height = pos * layer.scale;
+            Vec2 norm = Vec2(x, layer.step) / Vec2(width, height);
+            Vec2 size = norm * layer.scale;
 
-            uint8_t l = (noise_2D(height, perm) + 1.0f) * 127.5f;
-            n += l * layer.strength;
-        }
-
-        float half = width / 2.0f;
-        float norm = 0.0;
-        if (x < half) {
-            // norm = x / half;
-            norm = lerp(0, half, x);
-        } else {
-            norm = 1.0 - lerp(half, width, x);
-            // norm = (x - half + 1) / half;
-            // norm = 1.0 - norm;
+            uint8_t value = (noise_2D(size, permutation) + 1.0f) * 127.5f;
+            heat += value * layer.strength;
         }
 
 
-        // float norm = 1.0;
-        // if (x < half) {
-        //     norm = x / half;
-        // } else {
-        //     norm = (x - half + 1) / half;
-        //     norm = 1.0 - norm;
-        // }
-
-        fire[(height - 1) * width + x] = n * norm;
+        fire[(height - 1) * width + x] = heat * fire_cone[x] * t;
     }
 
     for (int y = 0; y < height - 1; y++) {

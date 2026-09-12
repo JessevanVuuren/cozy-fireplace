@@ -1,8 +1,12 @@
-for i in range(10):
+def lerp(a, b, c):
+    return a + (b - a) * c
+
+def parabolic( step,  max, p):
+    x = step / max
+    return 4 * x * (1 - x) ** p
+
+
+for i in range(11):
     h = 10 / 2
 
-    if i < h:
-        print(i/h)
-    else:
-        
-        print(1 - ((i+1)-h)/h)
+    print(parabolic(i, 10, 4))
