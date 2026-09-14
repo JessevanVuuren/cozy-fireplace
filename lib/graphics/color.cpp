@@ -6,6 +6,10 @@ Color::Color(float value) : red(value), green(value), blue(value) {}
 
 Color::Color(float red, float green, float blue) : red(red), green(green), blue(blue) {}
 
+const Color Color::Red = Color(1.0f, 0.0f, 0.0f);
+const Color Color::Green = Color(0.0f, 1.0f, 0.0f);
+const Color Color::Blue = Color(0.0f, 0.0f, 1.0f);
+
 uint8_t Color::to_8bit() const {
     uint8_t r = red * 7;
     uint8_t g = green * 7;

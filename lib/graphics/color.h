@@ -28,6 +28,10 @@ class Color {
     Color(float value);
     Color(float red, float green, float blue);
 
+    static const Color Red;
+    static const Color Green;
+    static const Color Blue;
+
     Color to_sRGB() const;
     Color to_gamma() const;
     uint8_t to_8bit() const;
