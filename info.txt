@@ -6,3 +6,5 @@ https://files.waveshare.com/upload/a/a7/SSD1351-Revision_1.5.pdf
 
 pio run --target upload
 pio device monitor
+
+make Graphics support 32, 16 and 8 bit

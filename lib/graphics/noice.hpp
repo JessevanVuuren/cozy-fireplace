@@ -1,7 +1,7 @@
 #ifndef NOISE_H
 #define NOISE_H
 
-#include "vec2.h"
+#include "vec2.hpp"
 
 #define PERMUTATION_SIZE 256
 

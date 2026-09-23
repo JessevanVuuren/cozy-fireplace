@@ -1,8 +1,8 @@
 #include <Arduino.h>
 #include <SSD1351.h>
-#include <color.h>
-#include <graphics.h>
-#include <noice.h>
+#include <color.hpp>
+#include <graphics.hpp>
+#include <noice.hpp>
 
 // HARDWARE: ESP32 240MHz, 320KB RAM, 4MB Flash
 // buffer = 128 * 128 = 16384(utf8) bytes
@@ -22,21 +22,25 @@ static constexpr int height = SSD1351_HEIGHT;
 
 Vec2 half = Vec2(width, height) / 2;
 
-SSD1351 driver(OLED_CS, OLED_DC, OLED_RST, CLOCK_SPEED, ColorLevel::BIT_18);
+SSD1351 driver(OLED_CS, OLED_DC, OLED_RST, CLOCK_SPEED, ColorLevel::BIT_16);
 Graphics canvas(width, height, [](int x, int y, int c) {
     driver.set_pixel(x, y, c);
 });
+
+Object gas = Object(half, Vec2(40, 40), Color::Red);
 
 void setup() {
     pinMode(FEED_BUTTON, INPUT_PULLDOWN);
 
     Serial.begin(115200);
     driver.start();
+
+    canvas.add_object(gas);
 }
 
 void debug_fps(unsigned long time_us) {
-    Serial.print(", FPS: ");
-    Serial.println(1000000.0 / (micros() - time_us));
+    Serial.print("FPS: ");
+    Serial.println(1000000.0f / (micros() - time_us));
 }
 
 void loop() {
@@ -44,9 +48,13 @@ void loop() {
 
     int feed_fire = digitalRead(FEED_BUTTON);
 
-    canvas.circle(half, 10, Color::Blue);
+    canvas.draw_objects();
+    canvas.set_pixel(half, Color::Red);
+
+    gas.set_angle(sin(time * 0.000001f) * PI);
+    gas.set_color(Color::to_RGB(ColorHSV{(sin(time * 0.000001f) + 1.0f) * 0.5f * 360.0f, 1.0f, 1.0f}));
 
     driver.render();
 
-    debug_fps(time);
+    // debug_fps(time);
 }

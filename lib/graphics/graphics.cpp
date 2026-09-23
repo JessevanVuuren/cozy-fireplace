@@ -1,4 +1,4 @@
-#include "graphics.h"
+#include "graphics.hpp"
 
 Graphics::Graphics(int width, int height, setPixelFunc set_pixel) : _width(width), _height(height), _set_pixel(set_pixel) {
     _pixels = width * height;
@@ -13,7 +13,7 @@ void Graphics::fill(Color color) {
 }
 
 void Graphics::set_pixel(Vec2 pos, Color color) {
-    _set_pixel(pos.x, pos.y, color.to_16bit());
+    _set_pixel(pos.x, pos.y, color.to_18bit());
 }
 
 void Graphics::circle(Vec2 pos, int radius, Color color) {
@@ -37,4 +37,32 @@ void Graphics::circle(Vec2 pos, int radius, Color color) {
             }
         }
     }
+}
+
+void Graphics::square(Vec2 start, Vec2 stop, Color color) {
+    Vec2 min = start.min(stop);
+    Vec2 max = start.max(stop);
+
+    Vec2 size = max - min;
+
+    for (int y = 0; y < size.y; y++) {
+        for (int x = 0; x < size.x; x++) {
+            set_pixel(Vec2(x, y) + start, color);
+        }
+    }
+}
+
+void Graphics::draw_objects() {
+    for (const Object *ob : _objects) {
+        ob->draw_object(_set_pixel);
+    }
+}
+
+int Graphics::add_object(Object &ob) {
+    int id = _objects.size();
+    ob.set_id(id);
+
+    _objects.push_back(&ob);
+
+    return id;
 }

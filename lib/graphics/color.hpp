@@ -37,11 +37,11 @@ class Color {
     uint8_t to_8bit() const;
     uint16_t to_16bit() const;
     uint32_t to_18bit() const;
-
-    ColorHSV from_RGB() const;
+    
+    const char *to_string() const;
+    
     static Color to_RGB(ColorHSV hsv);
     static Color to_RGB(ColorHSL hsl);
-    const char *to_string() const;
 
     Color operator+(const Color &c) const;
     Color operator-(const Color &c) const;
