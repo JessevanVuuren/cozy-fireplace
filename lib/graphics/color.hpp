@@ -31,15 +31,17 @@ class Color {
     static const Color Red;
     static const Color Green;
     static const Color Blue;
+    static const Color White;
+    static const Color Black;
 
     Color to_sRGB() const;
     Color to_gamma() const;
     uint8_t to_8bit() const;
     uint16_t to_16bit() const;
     uint32_t to_18bit() const;
-    
+
     const char *to_string() const;
-    
+
     static Color to_RGB(ColorHSV hsv);
     static Color to_RGB(ColorHSL hsl);
 

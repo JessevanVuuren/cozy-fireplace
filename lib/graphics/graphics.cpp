@@ -7,13 +7,17 @@ Graphics::Graphics(int width, int height, setPixelFunc set_pixel) : _width(width
 void Graphics::fill(Color color) {
     for (size_t y = 0; y < _height; y++) {
         for (size_t x = 0; x < _width; x++) {
-            _set_pixel(x, y, color.to_16bit());
+            _set_pixel(x, y, color.to_18bit());
         }
     }
 }
 
 void Graphics::set_pixel(Vec2 pos, Color color) {
     _set_pixel(pos.x, pos.y, color.to_18bit());
+}
+
+void Graphics::set_pixel(int x, int y, Color color) {
+    _set_pixel(x, y, color.to_18bit());
 }
 
 void Graphics::circle(Vec2 pos, int radius, Color color) {
@@ -65,4 +69,25 @@ int Graphics::add_object(Object &ob) {
     _objects.push_back(&ob);
 
     return id;
+}
+
+void Graphics::set_text(Vec2 start, Color color, String text) {
+    for (size_t i = 0; i < text.length(); i++) {
+        int index = char_font_index(text[i]) * FONT_HEIGHT;
+
+        int offset_x = start.x + FONT_WIDTH * i;
+        int offset_y = start.y;
+
+        for (size_t y = 0; y < FONT_HEIGHT; y++) {
+            uint8_t letter_row = font[index + y];
+
+            for (size_t x = 0; x < FONT_WIDTH; x++) {
+                int pixel = FONT_WIDTH - x - 1;
+
+                if (letter_row & 1 << (pixel)) {
+                    set_pixel(offset_x + x, offset_y + y, color);
+                }
+            }
+        }
+    }
 }

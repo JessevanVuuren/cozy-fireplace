@@ -4,6 +4,7 @@
 #include "color.hpp"
 #include "object.hpp"
 #include "vec2.hpp"
+#include "font.hpp"
 
 #include <algorithm>
 #include <cmath>
@@ -23,6 +24,9 @@ class Graphics {
 
     void fill(Color color);
     void set_pixel(Vec2 pos, Color color);
+    void set_pixel(int x, int y, Color color);
+
+    void set_text(Vec2 start, Color color, String text);
 
     void circle(Vec2 pos, int radius, Color color);
     void square(Vec2 start, Vec2 end, Color color);

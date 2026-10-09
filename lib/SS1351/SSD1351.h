@@ -88,6 +88,8 @@ class SSD1351 {
     void create_buffer();
     void fill_buffer(uint32_t color);
 
+    void set_contrast(uint8_t level);
+
     void set_pixel(int x, int y, uint32_t color);
     uint32_t get_pixel(int x, int y) const;
 

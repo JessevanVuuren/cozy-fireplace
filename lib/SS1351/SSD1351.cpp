@@ -110,7 +110,7 @@ void SSD1351::render() {
 }
 
 void SSD1351::set_pixel(int x, int y, uint32_t color) {
-    int index = (127-y) * SSD1351_HEIGHT + (127-x);
+    int index = (127 - y) * SSD1351_HEIGHT + (127 - x);
 
     switch (_color_bit) {
     case 0: {
@@ -173,6 +173,11 @@ void SSD1351::init_SPI() {
 void SSD1351::display_off() { write_regi(0xAE); }
 
 void SSD1351::display_on() { write_regi(0xAF); }
+
+void SSD1351::set_contrast(uint8_t level) {
+    write_regi(SSD1351_CONTRAST_MASTER);
+    write_data(level & 0b00001111);
+}
 
 void SSD1351::init_oled_regi() {
     write_regi(SSD1351_COMMAND_LOCK);
