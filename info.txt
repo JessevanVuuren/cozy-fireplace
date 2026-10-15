@@ -1,10 +1,20 @@
-https://docs.espressif.com/projects/esp-idf/en/v5.1/esp32/_images/esp32-devkitC-v4-pinout.png
-https://github.com/Gecko05/SSD1351-Driver-Library/blob/master/src/ssd1351.h
-https://www.waveshare.com/wiki/1.5inch_RGB_OLED_Module#Arduino_Tutorial
-https://files.waveshare.com/upload/a/a7/SSD1351-Revision_1.5.pdf
-https://github.com/trip5/Matrix-Fonts/blob/main/8-series/MatrixLight8x6.bdf
 
-pio run --target upload
-pio device monitor
+board:
+    - https://docs.espressif.com/projects/esp-idf/en/v5.1/esp32/_images/esp32-devkitC-v4-pinout.png
 
-make Graphics support 32, 16 and 8 bit
+libs:
+    - https://github.com/Gecko05/SSD1351-Driver-Library/blob/master/src/ssd1351.h
+
+display:
+    - https://www.waveshare.com/wiki/1.5inch_RGB_OLED_Module#Arduino_Tutorial
+    - https://files.waveshare.com/upload/a/a7/SSD1351-Revision_1.5.pdf
+
+font:
+    - https://github.com/trip5/Matrix-Fonts/blob/main/8-series/MatrixLight8x6.bdf
+
+commands: 
+    - pio run --target upload
+    - pio device monitor
+
+todo:
+    - make Graphics support 32, 16 and 8 bit

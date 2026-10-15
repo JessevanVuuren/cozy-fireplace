@@ -40,6 +40,9 @@ float fire_cone[width - 1] = {0};
 
 volatile float contrast_level = 0;
 
+volatile ulong menu = 0;
+volatile ulong previous_time = 0;
+
 uint32_t palette[256];
 uint32_t fire[height * width];
 
@@ -69,7 +72,7 @@ void setup() {
 
     permutation = make_permutation();
 
-    contrast_level = storage.getInt("contrast-level", 0);
+    contrast_level = storage.getFloat("contrast-level", 0);
     driver.set_contrast(contrast_level);
 
     for (int x = 0; x < width - SIDE_PADDING * 2; x++) {
@@ -97,9 +100,6 @@ void debug_fps(unsigned long time_us) {
     Serial.print("FPS: ");
     Serial.println(1000000.0f / (micros() - time_us));
 }
-
-volatile ulong menu = 0;
-volatile ulong previous_time = 0;
 
 void loop() {
 
@@ -149,7 +149,7 @@ void loop() {
             }
 
             driver.set_contrast((int)contrast_level);
-            storage.putInt("contrast", contrast_level);
+            storage.putFloat("contrast", contrast_level);
 
             Vec2 start = Vec2(0, height / 2 - height * 0.1);
             Vec2 stop = Vec2(width, height / 2 + height * 0.1);
