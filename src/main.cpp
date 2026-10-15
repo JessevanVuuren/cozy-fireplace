@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <Preferences.h>
 #include <SSD1351.h>
 #include <color.hpp>
 #include <graphics.hpp>
@@ -16,6 +17,8 @@
 #define FEED_BUTTON GPIO_NUM_13
 
 #define CLOCK_SPEED 20000000 // 20 MHz
+#define MICRO_IN_SEC 1000000
+#define SEC_IN_MICRO 0.000001
 
 #define SIDE_PADDING 2
 #define CONE_STRENGTH 0.5
@@ -30,8 +33,12 @@ Graphics canvas(width, height, [](int x, int y, int c) {
     driver.set_pixel(x, y, c);
 });
 
+Preferences storage;
+
 int *permutation;
 float fire_cone[width - 1] = {0};
+
+volatile float contrast_level = 0;
 
 uint32_t palette[256];
 uint32_t fire[height * width];
@@ -56,10 +63,14 @@ float parabolic(float step, float max, float power) {
 void setup() {
     pinMode(FEED_BUTTON, INPUT_PULLDOWN);
 
+    storage.begin("local");
     Serial.begin(115200);
     driver.start();
 
     permutation = make_permutation();
+
+    contrast_level = storage.getInt("contrast-level", 0);
+    driver.set_contrast(contrast_level);
 
     for (int x = 0; x < width - SIDE_PADDING * 2; x++) {
         fire_cone[x] = parabolic(x, width - 1, CONE_STRENGTH);
@@ -69,16 +80,6 @@ void setup() {
         ColorHSL color = ColorHSL{x / 4.0f, 1.0f, fminf(200, x * 2) / 255.0f};
         palette[x] = Color::to_RGB(color).to_18bit();
     }
-
-    // canvas.set_text(half, Color::Red, "ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz!\"#$%&'()*+,-./0123456789:;<=>?@[\]^_`{|}~");
-    canvas.set_text(Vec2(20, 40), Color::Red, "ABCDEFGHIJKL");
-    canvas.set_text(Vec2(20, 40 + FONT_HEIGHT * 1), Color::Red, "MNOPQRSTUVWXYZ");
-    canvas.set_text(Vec2(20, 40 + FONT_HEIGHT * 2), Color::Red, "abcdefghijklmno");
-    canvas.set_text(Vec2(20, 40 + FONT_HEIGHT * 3), Color::Red, "pqrstuvwxyz!\"#$");
-    canvas.set_text(Vec2(20, 40 + FONT_HEIGHT * 4), Color::Red, "%&'()*+,-./01234");
-    canvas.set_text(Vec2(20, 40 + FONT_HEIGHT * 5), Color::Red, "56789:;<=>?@[\]");
-    canvas.set_text(Vec2(20, 40 + FONT_HEIGHT * 6), Color::Red, "^_`{|}~");
-    
 
     driver.render();
 }
@@ -97,51 +98,70 @@ void debug_fps(unsigned long time_us) {
     Serial.println(1000000.0f / (micros() - time_us));
 }
 
+volatile ulong menu = 0;
+volatile ulong previous_time = 0;
+
 void loop() {
 
-    // for (int i = 0; i < 16; i++) {
-    //     Serial.print("Contrast: ");
-    //     Serial.println(i);
-    //     canvas.fill(Color::White.to_sRGB());
-    //     driver.set_contrast(i);
-    //     driver.render();
+    ulong now = micros();
+    ulong dt = now - previous_time;
+    previous_time = now;
 
-    //     delay(1000);
-    // }
+    for (int x = SIDE_PADDING; x < width - SIDE_PADDING; x++) {
+        float heat = 0.0f;
+        for (const Noise &layer : layers) {
+            Vec2 norm = Vec2(x, layer.step) / Vec2(width, height);
+            Vec2 size = norm * layer.scale;
 
-    // unsigned long time = micros();
-    // float t = (sinf(time * 0.0000001f) + 1.0f) * 0.5f;
+            uint8_t value = (noise_2D(size, permutation) + 1.0f) * 127.5f;
+            heat += value * layer.strength;
+        }
 
-    // for (int x = SIDE_PADDING; x < width - SIDE_PADDING; x++) {
-    //     float heat = 0.0f;
-    //     for (const Noise &layer : layers) {
-    //         Vec2 norm = Vec2(x, layer.step) / Vec2(width, height);
-    //         Vec2 size = norm * layer.scale;
+        fire[(height - 1) * width + x] = heat * fire_cone[x];
+    }
 
-    //         uint8_t value = (noise_2D(size, permutation) + 1.0f) * 127.5f;
-    //         heat += value * layer.strength;
-    //     }
+    for (int y = 0; y < height - 1; y++) {
+        for (int x = 0; x < width; x++) {
+            int heat = surrounding_fire_level(fire, x, y, width, height);
+            fire[y * width + x] = heat / 4.055f;
+        }
+    }
 
-    //     fire[(height - 1) * width + x] = heat * fire_cone[x];
-    // }
+    for (int y = 0; y < height; y++)
+        for (int x = 0; x < width; x++)
+            driver.set_pixel(x, y, palette[fire[y * width + x]]);
 
-    // for (int y = 0; y < height - 1; y++) {
-    //     for (int x = 0; x < width; x++) {
-    //         int heat = surrounding_fire_level(fire, x, y, width, height);
-    //         fire[y * width + x] = heat / 4.055f;
-    //     }
-    // }
+    for (Noise &layer : layers)
+        layer.step += layer.speed;
 
-    // for (int y = 0; y < height; y++)
-    //     for (int x = 0; x < width; x++)
-    //         driver.set_pixel(x, y, palette[fire[y * width + x]]);
+    int feed_fire = digitalRead(FEED_BUTTON);
 
-    // for (Noise &layer : layers)
-    //     layer.step += layer.speed;
+    if (feed_fire) {
 
-    // int feed_fire = digitalRead(FEED_BUTTON);
+        if (menu == 0) {
+            menu = now + MICRO_IN_SEC * 2;
+        }
 
-    // driver.render();
+        if (now > menu) {
+            contrast_level += dt * SEC_IN_MICRO;
+            if (contrast_level >= 16.0f) {
+                contrast_level -= 16.0f;
+            }
+
+            driver.set_contrast((int)contrast_level);
+            storage.putInt("contrast", contrast_level);
+
+            Vec2 start = Vec2(0, height / 2 - height * 0.1);
+            Vec2 stop = Vec2(width, height / 2 + height * 0.1);
+
+            canvas.square(start, stop, Color::Black);
+            canvas.set_text(Vec2(30, height / 2), Color::White, "Contrast " + String((int)contrast_level));
+        }
+    } else {
+        menu = 0;
+    }
+
+    driver.render();
 
     // debug_fps(time);
 }
