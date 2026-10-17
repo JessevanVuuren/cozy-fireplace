@@ -2,9 +2,9 @@
 #define GRAPHICS_H
 
 #include "color.hpp"
+#include "font.hpp"
 #include "object.hpp"
 #include "vec2.hpp"
-#include "font.hpp"
 
 #include <algorithm>
 #include <cmath>
@@ -13,7 +13,7 @@
 #include <memory>
 #include <vector>
 
-using setPixelFunc = std::function<void(int, int, uint32_t)>;
+using setPixelFunc = std::function<void(int, int, Color)>;
 
 class Graphics {
   public:
@@ -32,7 +32,7 @@ class Graphics {
     void square(Vec2 start, Vec2 end, Color color);
 
     void draw_objects();
-    int add_object(Object &ob);
+    void add_object(Object &ob);
 
   private:
     setPixelFunc _set_pixel;

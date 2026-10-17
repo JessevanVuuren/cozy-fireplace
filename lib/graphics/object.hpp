@@ -7,38 +7,55 @@
 
 #include <functional>
 
-using setPixelFunc = std::function<void(int, int, uint32_t)>;
-
-enum class ObjectType {
-    Rectangle,
-};
+using setPixelFunc = std::function<void(int, int, Color)>;
 
 class Object {
   public:
-    Object(Vec2 pos, Vec2 size, Color color) : _center(pos), _size(size), _color(color) {};
+    virtual ~Object() = default;
 
-    Vec2 get_pos() const { return _center; }
-    Vec2 get_size() const { return _size; }
-    Color get_color() const { return _color; }
+    virtual void draw(setPixelFunc set_pixel) const = 0;
 
-    void set_id(int id) { _id = id; }
+    const float get_angle() const { return _angle; }
+    const Color &get_color() const { return _color; }
+    const Vec2 &get_center() const { return _center; }
+
     void set_angle(float angle) { _angle = angle; }
     void set_color(const Color &color) { _color = color; }
+    void set_center(const Vec2 &center) { _center = center; }
 
-    void draw_object(setPixelFunc set_pixel) const;
+  protected:
+    Object(Vec2 center, Color color, float angle = 0.0f) : _center(center), _color(color), _angle(angle) {};
 
   private:
-    void draw_rectangle(setPixelFunc set_pixel) const;
-
-    int _id;
-
     Vec2 _center;
-    Vec2 _size;
-
-    float _angle;
-
     Color _color;
-    ObjectType _type;
+    float _angle;
+};
+
+class Rectangle : public Object {
+  public:
+    Rectangle(Vec2 center, Vec2 size, Color color) : Object(center, color), _size(size) {};
+
+    void draw(setPixelFunc set_pixel) const override;
+
+    const Vec2 &get_size() const { return _size; };
+    void set_size(const Vec2 &size) { _size = size; };
+
+  private:
+    Vec2 _size;
+};
+
+class Circle : public Object {
+  public:
+    Circle(Vec2 center, float radius, Color color) : Object(center, color), _radius(radius) {};
+
+    void draw(setPixelFunc set_pixel) const override;
+
+    const float &get_radius() const { return _radius; };
+    void set_radius(const float &radius) { _radius = radius; };
+
+  private:
+    float _radius;
 };
 
 #endif // OBJECT_H

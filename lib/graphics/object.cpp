@@ -1,16 +1,8 @@
 #include "graphics.hpp"
 
-void Object::draw_object(setPixelFunc set_pixel) const {
-    switch (_type) {
-    case ObjectType::Rectangle:
-        draw_rectangle(set_pixel);
-        break;
-    }
-}
-
-void Object::draw_rectangle(setPixelFunc set_pixel) const {
-    float c = cos(_angle);
-    float s = sin(_angle);
+void Rectangle::draw(setPixelFunc set_pixel) const {
+    float c = cos(get_angle());
+    float s = sin(get_angle());
 
     float half_x = _size.x * 0.5f;
     float half_y = _size.y * 0.5f;
@@ -24,7 +16,30 @@ void Object::draw_rectangle(setPixelFunc set_pixel) const {
             if (source_x >= -half_x && source_x < half_x &&
                 source_y >= -half_y && source_y < half_y) {
 
-                set_pixel(x + _center.x, y + _center.y, _color.to_16bit());
+                set_pixel(x + get_center().x, y + get_center().y, get_color());
+            }
+        }
+    }
+}
+
+void Circle::draw(setPixelFunc set_pixel) const {
+    int r2 = _radius * _radius;
+
+    int x_min = get_center().x - _radius;
+    int x_max = get_center().x + _radius;
+    int y_min = get_center().y - _radius;
+    int y_max = get_center().y + _radius;
+
+    for (int y = y_min; y <= y_max; ++y) {
+        int dy = y - get_center().y;
+        int dy2 = dy * dy;
+
+        for (int x = x_min; x <= x_max; ++x) {
+            int dx = x - get_center().x;
+            int dx2 = dx * dx;
+
+            if (dx2 + dy2 < r2) {
+                set_pixel(x, y, get_color());
             }
         }
     }
