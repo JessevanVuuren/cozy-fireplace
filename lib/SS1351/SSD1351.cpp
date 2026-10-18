@@ -50,11 +50,9 @@ void SSD1351::create_buffer() {
 
 int SSD1351::_get_buffer_size() {
     switch (_color_bit) {
-    case 0:
+    case ColorLevel::BIT_16:
         return SSD1351_PIXELS * 2;
-    case 1:
-        return SSD1351_PIXELS * 2;
-    case 2:
+    case ColorLevel::BIT_18:
         return SSD1351_PIXELS * 3;
     }
 }
@@ -80,10 +78,10 @@ void SSD1351::clear_buffer() {
     }
 }
 
-void SSD1351::fill_buffer(uint32_t color) {
+void SSD1351::fill_buffer(float r, float g, float b) {
     for (int y = 0; y < SSD1351_HEIGHT; y++) {
         for (int x = 0; x < SSD1351_WIDTH; x++) {
-            set_pixel(x, y, color);
+            set_pixel(x, y, r, g, b);
         }
     }
 }
@@ -109,34 +107,28 @@ void SSD1351::render() {
     digitalWrite(_cs, HIGH);
 }
 
-void SSD1351::set_pixel(int x, int y, uint32_t color) {
+void SSD1351::set_pixel(int x, int y, float r, float g, float b) {
     int index = (127 - y) * SSD1351_HEIGHT + (127 - x);
 
     switch (_color_bit) {
-    case 0: {
+    case ColorLevel::BIT_16: {
         int offset = index * 2;
 
-        int r = ((color >> 5) & 0x07) * 31 / 7;
-        int g = ((color >> 2) & 0x07) * 63 / 7;
-        int b = ((color >> 0) & 0x03) * 31 / 3;
+        int r1 = int(r * 31) & 0x1F;
+        int g1 = int(g * 63) & 0x3F;
+        int b1 = int(b * 31) & 0x1F;
 
-        uint16_t bit_color = (r << 11) | (g << 5) | b;
-
-        _buffer[offset + 0] = bit_color >> 8;
-        _buffer[offset + 1] = bit_color & 0xFF;
-    } break;
-    case 1: {
-        int offset = index * 2;
+        int color = (r1 << 11) | (g1 << 5) | b1;
 
         _buffer[offset + 0] = color >> 8;
         _buffer[offset + 1] = color & 0xFF;
     } break;
-    case 2: {
+    case ColorLevel::BIT_18: {
         int offset = index * 3;
 
-        _buffer[offset + 0] = (color >> 12) & 0x3F;
-        _buffer[offset + 1] = (color >> 6) & 0x3F;
-        _buffer[offset + 2] = color & 0x3F;
+        _buffer[offset + 0] = int(r * 63) & 0x3F;
+        _buffer[offset + 1] = int(g * 63) & 0x3F;
+        _buffer[offset + 2] = int(b * 63) & 0x3F;
     } break;
     }
 }
@@ -203,13 +195,10 @@ void SSD1351::init_oled_regi() {
 
     write_regi(SSD1351_SET_REMAP_COLOR);
     switch (_color_bit) {
-    case 0: {
+    case ColorLevel::BIT_16: {
         write_data(0x74);
     } break;
-    case 1: {
-        write_data(0x74);
-    } break;
-    case 2: {
+    case ColorLevel::BIT_18: {
         write_data(0xB4);
     } break;
     }

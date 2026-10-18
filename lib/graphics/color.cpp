@@ -12,30 +12,6 @@ const Color Color::Blue = Color(0.0f, 0.0f, 1.0f);
 const Color Color::White = Color(1.0f, 1.0f, 1.0f);
 const Color Color::Black = Color(0.0f, 0.0f, 0.0f);
 
-uint8_t Color::to_8bit() const {
-    uint8_t r = red * 7;
-    uint8_t g = green * 7;
-    uint8_t b = blue * 3;
-
-    return (r << 5) | (g << 2) | b;
-}
-
-uint16_t Color::to_16bit() const {
-    uint8_t r = red * 31;
-    uint8_t g = green * 63;
-    uint8_t b = blue * 31;
-
-    return (r << 11) | (g << 5) | b;
-}
-
-uint32_t Color::to_18bit() const {
-    uint32_t r = red * 63;
-    uint32_t g = green * 63;
-    uint32_t b = blue * 63;
-
-    return (r << 12) | (g << 6) | b;
-}
-
 const char *Color::to_string() const {
     std::string str = "RGB: " +
                       std::to_string(red) + ", " +
@@ -45,8 +21,34 @@ const char *Color::to_string() const {
     return str.c_str();
 }
 
-Color Color::to_gamma() const {
-    return Color(*this).pow(1.0f / 2.2f);
+Color &Color::to_8bit() {
+    red = int(red * 7) / 7.0f;
+    green = int(green * 7) / 7.0f;
+    blue = int(blue * 3) / 3.0f;
+
+    return *this;
+}
+
+Color &Color::to_16bit() {
+    red = int(red * 31) / 31.0f;
+    green = int(green * 63) / 63.0f;
+    blue = int(blue * 31) / 31.0f;
+
+    return *this;
+}
+
+Color &Color::to_18bit() {
+    red = int(red * 63) / 63.0f;
+    green = int(green * 63) / 63.0f;
+    blue = int(blue * 63) / 63.0f;
+
+    return *this;
+}
+
+Color &Color::to_gamma() {
+    (*this).pow(1.0f / 2.2f);
+
+    return *this;
 }
 
 float Color::_convert_sRGB(float value) const {
@@ -56,14 +58,13 @@ float Color::_convert_sRGB(float value) const {
     return 1.055f * std::pow(value, 1.0f / 2.4f) - 0.055f;
 }
 
-Color Color::to_sRGB() const {
-    Color c = *this;
+Color &Color::to_sRGB() {
 
-    c.red = _convert_sRGB(red);
-    c.green = _convert_sRGB(green);
-    c.blue = _convert_sRGB(blue);
+    red = _convert_sRGB(red);
+    green = _convert_sRGB(green);
+    blue = _convert_sRGB(blue);
 
-    return c;
+    return *this;
 }
 
 Color Color::to_RGB(ColorHSV hsv) {
@@ -78,20 +79,20 @@ Color Color::to_RGB(ColorHSV hsv) {
 }
 
 Color Color::to_RGB(ColorHSL hsl) {
-    
+
     float c = (1.0f - fabsf(2.0f * hsl.lightness - 1.0f)) * hsl.saturation;
     float h = hsl.hue / 60.0f;
     float x = c * (1.0f - fabsf(fmodf(h, 2.0f) - 1.0f));
     float m = hsl.lightness - c / 2.0f;
-    
+
     Color color = _hsl_hsv_to_rgb(h, c, x);
-    
+
     return color + m;
 }
 
 Color Color::_hsl_hsv_to_rgb(float h, float c, float x) {
     Color color;
-    
+
     if (h >= 0.0f && h < 1.0f) {
         color.red = c;
         color.green = x;

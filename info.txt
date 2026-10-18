@@ -17,4 +17,5 @@ commands:
     - pio device monitor
 
 todo:
-    - make Graphics support 32, 16 and 8 bit
+    - support bitmap 
+    - 

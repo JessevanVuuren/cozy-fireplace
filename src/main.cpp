@@ -27,10 +27,11 @@ constexpr uint8_t width = SSD1351_WIDTH;
 constexpr uint8_t height = SSD1351_HEIGHT;
 
 Vec2 half = Vec2(width, height) / 2;
+Vec2 full = Vec2(width, height);
 
 SSD1351 driver(OLED_CS, OLED_DC, OLED_RST, CLOCK_SPEED, ColorLevel::BIT_18);
 Graphics canvas(width, height, [](int x, int y, Color c) {
-    driver.set_pixel(x, y, c.to_18bit());
+    driver.set_pixel(x, y, c.red, c.green, c.blue);
 });
 
 Rectangle rect = Rectangle(half, Vec2(40, 40), Color::Red);
@@ -42,16 +43,16 @@ void setup() {
     Serial.begin(115200);
     driver.start();
 
-    // canvas.add_object(rect);
-    canvas.add_object(cir);
+    for (size_t y = 0; y < height; y++) {
+        for (size_t x = 0; x < width; x++) {
+            Vec2 uv = Vec2(x, y) / full;
+            Color q = Color(uv.x, uv.y, 0.0);
+            canvas.set_pixel(x, y, q.to_8bit());
+        }
+    }
+
+    driver.render();
 }
 
 void loop() {
-    canvas.draw_objects();
-
-    // rect.set_angle(sin(micros() * SEC_IN_MICRO) * PI);
-    // rect.set_color(Color::to_RGB(ColorHSV{(sin(micros() * SEC_IN_MICRO) + 1.0f) * 0.5f * 360.0f, 1.0f, 1.0f}));
-    cir.set_color(Color::to_RGB(ColorHSV{(sin(micros() * SEC_IN_MICRO) + 1.0f) * 0.5f * 360.0f, 1.0f, 1.0f}));
-
-    driver.render();
 }

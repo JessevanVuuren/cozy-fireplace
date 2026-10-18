@@ -34,11 +34,11 @@ class Color {
     static const Color White;
     static const Color Black;
 
-    Color to_sRGB() const;
-    Color to_gamma() const;
-    uint8_t to_8bit() const;
-    uint16_t to_16bit() const;
-    uint32_t to_18bit() const;
+    Color &to_sRGB();
+    Color &to_gamma();
+    Color &to_8bit();
+    Color &to_16bit();
+    Color &to_18bit();
 
     const char *to_string() const;
 

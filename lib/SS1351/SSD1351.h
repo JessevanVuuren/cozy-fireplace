@@ -60,7 +60,6 @@
 #define COLOR_GRAY 0X8430
 
 enum ColorLevel {
-    BIT_8,
     BIT_16,
     BIT_18
 };
@@ -86,11 +85,11 @@ class SSD1351 {
 
     void clear_buffer();
     void create_buffer();
-    void fill_buffer(uint32_t color);
+    void fill_buffer(float r, float g, float b);
 
     void set_contrast(uint8_t level);
 
-    void set_pixel(int x, int y, uint32_t color);
+    void set_pixel(int x, int y, float r, float g, float b);
     uint32_t get_pixel(int x, int y) const;
 
     void render();
