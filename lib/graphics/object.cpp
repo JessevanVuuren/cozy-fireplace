@@ -61,7 +61,24 @@ const Color &Bitmap::get_pixel(int x, int y) {
         return _data[y * _width + x];
     }
     Serial.println("WARNING: y out of bounce");
+    return NULL;
 }
+
+// void Bitmap::get_pixel(int x, int y, Color *color) {
+//     if (_check_box(x, y)) {
+//         color = &_data[y * _width + x];
+//         return true;
+//     }
+//     Serial.println("WARNING: y out of bounce");
+//     return false;
+// }
+
+// const Color &Bitmap::get_pixel(int x, int y) {
+//     if (_check_box(x, y)) {
+//         return _data[y * _width + x];
+//     }
+//     Serial.println("WARNING: y out of bounce");
+// }
 
 void Bitmap::draw(setPixelFunc set_pixel) const {
     float c = cos(get_angle());
