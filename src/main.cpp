@@ -49,7 +49,7 @@ void setup() {
         for (int x = 0; x < bit.get_width(); x++) {
             Vec2 uv = Vec2(x, y) / bit.get_size();
             Color q = Color(uv.x, uv.y, 0.0);
-            bit.set_pixel(x, y, q.to_8bit());
+            bit.set_pixel(x, y, q);
         }
     }
 
