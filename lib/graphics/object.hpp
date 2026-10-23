@@ -32,6 +32,35 @@ class Object {
     float _angle;
 };
 
+class Bitmap : public Object {
+  public:
+    Bitmap(Vec2 center, int width, int height);
+    ~Bitmap() { delete[] _data; };
+
+    void draw(setPixelFunc set_pixel) const override;
+
+    int get_height() const { return _height; };
+    int get_width() const { return _width; };
+    Vec2 get_size() const { return Vec2(_width, _height); };
+
+    void set_height(int height) { _height = height; };
+    void set_width(int width) { _width = width; };
+
+    Color *get_data() const { return _data; };
+
+    void set_pixel(int x, int y, const Color &color);
+    const Color &get_pixel(int x, int y);
+
+  private:
+    int _width;
+    int _height;
+    Color *_data;
+
+    bool _check_box(int x, int y) { return _check_box_x(x) && _check_box_y(y); };
+    bool _check_box_x(int x) { return x >= 0 && x < _width; };
+    bool _check_box_y(int y) { return y >= 0 && y < _height; };
+};
+
 class Rectangle : public Object {
   public:
     Rectangle(Vec2 center, Vec2 size, Color color) : Object(center, color), _size(size) {};

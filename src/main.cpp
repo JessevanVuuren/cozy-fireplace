@@ -34,8 +34,10 @@ Graphics canvas(width, height, [](int x, int y, Color c) {
     driver.set_pixel(x, y, c.red, c.green, c.blue);
 });
 
-Rectangle rect = Rectangle(half, Vec2(40, 40), Color::Red);
 Circle cir = Circle(half, 20.0f, Color::Red);
+
+Rectangle rect = Rectangle(Vec2(width / 3.0f * 1.0f, half.y), Vec2(30, 30), Color::Green);
+Bitmap bit = Bitmap(Vec2(width / 3.0f * 2.0f, half.y), 30, 30);
 
 void setup() {
     pinMode(FEED_BUTTON, INPUT_PULLDOWN);
@@ -43,16 +45,25 @@ void setup() {
     Serial.begin(115200);
     driver.start();
 
-    for (size_t y = 0; y < height; y++) {
-        for (size_t x = 0; x < width; x++) {
-            Vec2 uv = Vec2(x, y) / full;
+    for (int y = 0; y < bit.get_height(); y++) {
+        for (int x = 0; x < bit.get_width(); x++) {
+            Vec2 uv = Vec2(x, y) / bit.get_size();
             Color q = Color(uv.x, uv.y, 0.0);
-            canvas.set_pixel(x, y, q.to_8bit());
+            bit.set_pixel(x, y, q.to_8bit());
         }
     }
 
-    driver.render();
+    canvas.add_object(bit);
+    canvas.add_object(rect);
 }
 
 void loop() {
+    unsigned long time = micros();
+
+    canvas.draw_objects();
+
+    bit.set_angle(sin(time * 0.000001f) * PI);
+    rect.set_angle(sin(time * 0.000001f) * PI);
+
+    driver.render();
 }
