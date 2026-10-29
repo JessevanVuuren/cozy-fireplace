@@ -56,29 +56,13 @@ void Bitmap::set_pixel(int x, int y, const Color &c) {
     Serial.println("WARNING: x out of bounce");
 }
 
-const Color &Bitmap::get_pixel(int x, int y) {
+const Color *Bitmap::get_pixel(int x, int y) {
     if (_check_box(x, y)) {
-        return _data[y * _width + x];
+        return &_data[y * _width + x];
     }
     Serial.println("WARNING: y out of bounce");
-    return NULL;
+    return nullptr;
 }
-
-// void Bitmap::get_pixel(int x, int y, Color *color) {
-//     if (_check_box(x, y)) {
-//         color = &_data[y * _width + x];
-//         return true;
-//     }
-//     Serial.println("WARNING: y out of bounce");
-//     return false;
-// }
-
-// const Color &Bitmap::get_pixel(int x, int y) {
-//     if (_check_box(x, y)) {
-//         return _data[y * _width + x];
-//     }
-//     Serial.println("WARNING: y out of bounce");
-// }
 
 void Bitmap::draw(setPixelFunc set_pixel) const {
     float c = cos(get_angle());

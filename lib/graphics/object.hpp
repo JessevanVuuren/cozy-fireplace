@@ -15,9 +15,9 @@ class Object {
 
     virtual void draw(setPixelFunc set_pixel) const = 0;
 
-    const float get_angle() const { return _angle; }
-    const Color &get_color() const { return _color; }
-    const Vec2 &get_center() const { return _center; }
+    float get_angle() const { return _angle; }
+    const Color get_color() const { return _color; }
+    const Vec2 get_center() const { return _center; }
 
     void set_angle(float angle) { _angle = angle; }
     void set_color(const Color &color) { _color = color; }
@@ -49,7 +49,7 @@ class Bitmap : public Object {
     Color *get_data() const { return _data; };
 
     void set_pixel(int x, int y, const Color &color);
-    const Color &get_pixel(int x, int y);
+    const Color *get_pixel(int x, int y);
 
   private:
     int _width;
@@ -67,7 +67,7 @@ class Rectangle : public Object {
 
     void draw(setPixelFunc set_pixel) const override;
 
-    const Vec2 &get_size() const { return _size; };
+    const Vec2 get_size() const { return _size; };
     void set_size(const Vec2 &size) { _size = size; };
 
   private:
@@ -80,7 +80,7 @@ class Circle : public Object {
 
     void draw(setPixelFunc set_pixel) const override;
 
-    const float &get_radius() const { return _radius; };
+    float get_radius() const { return _radius; };
     void set_radius(const float &radius) { _radius = radius; };
 
   private:

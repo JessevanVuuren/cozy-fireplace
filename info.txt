@@ -17,5 +17,4 @@ commands:
     - pio device monitor
 
 todo:
-    - support bitmap 
-    - 
+    - support alpha
