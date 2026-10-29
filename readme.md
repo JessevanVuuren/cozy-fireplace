@@ -12,7 +12,6 @@
 
 board:
 - https://docs.espressif.com/projects/esp-idf/en/v5.1/esp32/_images/
-- esp32-devkitC-v4-pinout.png
 
 libs:
 - https://github.com/Gecko05/SSD1351-Driver-Library/blob/master/src/ssd1351.h
