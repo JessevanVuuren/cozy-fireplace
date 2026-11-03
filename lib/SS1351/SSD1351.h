@@ -6,7 +6,6 @@
 #define SSD1351_H
 
 #include <SPI.h>
-#include <cstdint>
 
 #define SSD1351_SET_COLUMN_ADDRESS 0x15
 #define SSD1351_SET_ROW_ADDRESS 0x75
@@ -44,6 +43,7 @@
 #define SSD1351_ZERO 0
 #define SSD1351_WIDTH 128  // 128 pixels in total
 #define SSD1351_HEIGHT 128 // 128 pixels in total
+#define SSD1351_MAX_CONTRAST 0b1111
 
 #define SSD1351_PIXELS (SSD1351_HEIGHT * SSD1351_WIDTH)
 
