@@ -87,6 +87,10 @@ Vec2 Vec2::operator/(const float v) const {
     return Vec2(x / v, y / v);
 }
 
+Vec2 operator/(float v, const Vec2 &o) {
+    return Vec2(v / o.x, v / o.y);
+}
+
 Vec2 &Vec2::operator+=(const Vec2 &c) {
     x += c.x;
     y += c.y;

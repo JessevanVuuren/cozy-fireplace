@@ -47,6 +47,8 @@ class Vec2 {
     Vec2 operator*(const float v) const;
     Vec2 operator/(const float v) const;
 
+    friend Vec2 operator/(float v, const Vec2 &o);
+
     Vec2 &operator+=(const Vec2 &o);
     Vec2 &operator-=(const Vec2 &o);
     Vec2 &operator*=(const Vec2 &o);
